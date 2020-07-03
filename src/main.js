@@ -211,16 +211,19 @@ async function sortedQueries(ksqlmap) {
     // select output queries we want to generate
     // KSQL case is a little odd so just lowercase everything
     // and also grab all of it's dependencies
-    const lowerCaseQueries = config.get('topics')
+    const topics = config.get('topics')
+    const lowerCaseQueries = topics
         .map(q => q.toLowerCase().trim())
         .sort()
     Object.keys(contents)
         .forEach(query => {
 
-            if (lowerCaseQueries.includes(query.toLowerCase().trim())) {
-
+            // If we haven't defined any topics then include everything.
+            // If we have, then only generate the dependencies for those queries.
+            if (topics.length === 0) {
                 depends[query.toLowerCase().trim()] = getDeps(query)
-
+            } else if (lowerCaseQueries.includes(query.toLowerCase().trim())) {
+                depends[query.toLowerCase().trim()] = getDeps(query)    
             }
 
         })
